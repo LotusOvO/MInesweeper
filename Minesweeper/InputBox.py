@@ -11,7 +11,7 @@ class InputBox:
         self.text = ''
         self.done = False
         self.length = length
-        self.font = pygame.font.Font("./resources/simhei.ttf", 32)
+        self.font = pygame.font.Font("./resources/simhei.ttf", 20)
 
     def dealEvent(self, event: pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:

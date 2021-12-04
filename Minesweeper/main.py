@@ -3,8 +3,13 @@ import pygame
 import random
 import time
 import InputBox
+import tkinter
+from tkinter import messagebox
 
 SIZE = 30
+mes = 1
+root = tkinter.Tk()
+root.withdraw()
 
 
 def drawText(screen, font, x, y, text, color=(255, 255, 255)):
@@ -125,7 +130,7 @@ colinput = InputBox.InputBox(2, pygame.Rect(65, 30, 6, 25))
 numinput = InputBox.InputBox(2, pygame.Rect(120, 30, 6, 25))
 
 submit = pygame.Rect(170, 17, 50, 30)
-
+messagebox.showinfo("提示", "左上角调整难度\n左键打开格子\n右键切换标记\n对已打开格子右键可打开附近格子")
 while True:
     clock.tick(60)
     face_pos_x = width // 2 - 30
@@ -147,9 +152,18 @@ while True:
             ml, mm, mr = pygame.mouse.get_pressed()
             if ml and not mr:
                 if submit.collidepoint(event.pos):
-                    row = int(rowinput.text)
-                    col = int(colinput.text)
-                    minenum = int(numinput.text)
+                    if rowinput.text.isdigit() and int(rowinput.text) > 0:
+                        row = int(rowinput.text)
+                    else:
+                        row = 10
+                    if colinput.text.isdigit() and int(colinput.text) > 0:
+                        col = int(colinput.text)
+                    else:
+                        col = 20
+                    if numinput.text.isdigit() and int(numinput.text) > 0:
+                        minenum = int(numinput.text)
+                    else:
+                        minenum = 20
                     size = width, height = col * SIZE, row * SIZE + 60
                     screen = pygame.display.set_mode(size)
                     game_status = 1
@@ -160,6 +174,7 @@ while True:
                             mineblock = MineBlock(col, row)
                             game_status = 1
                             nowtime = 0
+                            mes = 1
                 else:
                     if game_status == 1:
                         mineblock.creatmine(x, y, minenum)
@@ -169,19 +184,21 @@ while True:
                         if mineblock.block[x][y].status == 0:
                             if not mineblock.openmine(x, y):
                                 game_status = 0
+                                if mes == 1:
+                                    mes = 3
+
             elif not ml and mr:
                 if game_status == 2 and y >= 0:
+                    if game_status == 2 and y >= 0:
+                        if mineblock.block[x][y].status == 1:
+                            if not mineblock.doubleclick(x, y):
+                                game_status = 0
                     if mineblock.block[x][y].status == 0:
                         mineblock.block[x][y].status = 3
                     elif mineblock.block[x][y].status == 3:
                         mineblock.block[x][y].status = 4
                     elif mineblock.block[x][y].status == 4:
                         mineblock.block[x][y].status = 0
-            elif ml and mr:
-                if game_status == 2 and y >= 0:
-                    if mineblock.block[x][y].status == 1:
-                        if not mineblock.doubleclick(x, y):
-                            game_status = 0
 
     screen.fill(color)
     n = 0
@@ -209,6 +226,8 @@ while True:
 
     if count_opened + count_flag == row * col:
         game_status = 3
+        if mes == 1:
+            mes = 2
 
     # 渲染笑脸
     if game_status == 1 or game_status == 2:
@@ -238,3 +257,10 @@ while True:
     screen.blit(textSurface, (175, 22))
 
     pygame.display.flip()
+
+    if mes == 2:
+        messagebox.showinfo("提示", "恭喜！\n点击笑脸重新开始")
+        mes = 0
+    elif mes == 3:
+        messagebox.showinfo("提示", "遗憾！\n点击笑脸重新开始")
+        mes = 0
